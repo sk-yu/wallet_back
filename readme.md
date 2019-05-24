@@ -1,1 +1,5 @@
-single running wallet with rest api
+# wallet backend
+
+single running wallet with rest api.
+require mongoDB.
+
