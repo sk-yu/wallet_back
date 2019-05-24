@@ -1,0 +1,1 @@
+single running wallet with rest api
