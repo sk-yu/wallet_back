@@ -1,8 +1,14 @@
-'use strict';
-
 const mongoose = require('mongoose');
+const property = require('../../configs/property');
 
 let db = mongoose.connection;
+const options = {
+    useUnifiedTopology : true, 
+    useCreateIndex: true, 
+    useNewUrlParser:true, 
+    auto_reconnect:true, 
+    useFindAndModify:false 
+};
 
 db.on('error', function(err){
     console.log(err);
@@ -20,21 +26,21 @@ db.on('disconnected', async function() {
     console.log('MongoDB disconnected!');
     
     try {
-        await mongoose.connect(property.mongoUrl, {auto_reconnect:true, reconnectTries: Number.MAX_VALUE });
+        await mongoose.connect(property.mongoUrl, options);
     }
     catch(e){
-        //console.log(e);
+        console.log(e);
     }
     
 });
 
 (async () => {
     try {
-        await mongoose.connect(property.mongoUrl, {auto_reconnect:true, reconnectTries: Number.MAX_VALUE });
+        let ret = await mongoose.connect(property.mongoUrl, options);
     }
     catch(e){
-        //console.log(e);
+        console.log(e);
     }
 })();
 
-module.exports = mongoose;
+module.exports = db;

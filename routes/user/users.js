@@ -4,16 +4,15 @@ const express = require('express');
 const router = express.Router();
 
 router.post('/signup', async function(req, res) {
-    let usernameRegex = /^[a-z0-9]+$/;
-
-    if( !usernameRegex.test(req.body.username)) {
-        return res.status(400).json ({
-            error: "BAD USERNAME",
-            code:1
-        });
-    }
-
     try {
+        let usernameRegex = /^[a-z0-9]+$/;
+
+        if( !usernameRegex.test(req.body.username)) {
+            return res.status(500).json ({
+                error: "BAD USERNAME",
+            });
+        }
+
         let ret = await users.signup(req.body.email, req.body.password, req.body.passphase);
         return res.json(ret);
     }

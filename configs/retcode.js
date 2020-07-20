@@ -8,30 +8,43 @@ class retcode {
         }
     }
 
+    getInternalServiceError() {
+        return {
+            code: 500,
+            msg: 'Internal Service Error'
+        }  
+    }
+
     getWrongParameter() {
         return {
-            code: 501,
+            code: 500,
             msg: 'Wrong Paramenter'
         }
     }
 
     getAlreadyEmailAddress() {
         return {
-            code: 510,
+            code: 500,
             msg: 'already email address'
         }
     }
 
     getNotfoundEmail() {
         return {
-            code: 511,
+            code: 500,
             msg: 'NotfoundEmail'
         }
     }
     getWrongPassword() {
         return {
-            code: 512,
+            code: 500,
             msg: 'WrongPassword'
+        }
+    }
+    getTokenError() {
+        return {
+            code: 500,
+            msg: 'Token Error'
         }
     }
 }
