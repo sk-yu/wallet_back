@@ -2,6 +2,15 @@
 
 module.exports = {
     apiPrePath: '/api/v1',
-    mongoUrl: 'mongodb://localhost/wallet',
-    ethRpc: 'http://172.20.1.205:28000'
+    mongoUrl: 'mongodb://username:password@localhost/wallet',
+    ethRpc: 'https://ropsten-rpc.linkpool.io',
+    erc20: '',
+    jwt:{
+        secret: 'test',
+        options:{
+            expiresIn: '30m',
+            algorithm: 'HS256'
+        }
+    }
+ 
 }

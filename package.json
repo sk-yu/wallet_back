@@ -1,18 +1,22 @@
 {
   "name": "wallet-backend",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "wallet backend test project",
+  "author": "skyu82@gmail.com",
   "scripts": {
     "start": "node ./bin/www"
   },
   "dependencies": {
+    "abi-decoder": "^2.3.0",
     "cookie-parser": "~1.4.3",
     "crypto-js": "^3.1.9-1",
     "debug": "~2.6.9",
+    "ethereumjs-tx": "^2.1.2",
     "ethereumjs-util": "^6.2.0",
     "express": "~4.16.0",
     "http-errors": "~1.6.2",
-    "mongoose": "^5.4.4",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.22",
     "morgan": "~1.9.0",
     "pug": "2.0.0-beta11",
     "tar": "^4.4.8",
