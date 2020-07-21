@@ -7,7 +7,7 @@ router.post('/signup', async function(req, res) {
     let usernameRegex = /^[a-z0-9]+$/;
 
     if( !usernameRegex.test(req.body.username)) {
-        return res.status(400).json ({
+        return res.status(500).json ({
             error: "BAD USERNAME",
             code:1
         });
