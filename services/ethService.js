@@ -2,7 +2,7 @@
 const web3 = require('web3');
 const property = require('../configs/property');
 const crypto = require('../utils/crypto');
-const txHistory = require('../models/txHistory');
+const txHistoryModel = require('../models/txHistorySchema');
 
 class eth {
     constructor() {
@@ -30,14 +30,18 @@ class eth {
         }
     }
 
-    async sendTransaction(user, passphase, to, amount) {
+    async sendTransaction(user, passphase, from, to, amount) {
         try{
-            let privateKey = crypto.dec(user.eth.privatekey, passphase);
-            let txValue = this._web3.utils.numberToHex(this._web3.utils.toWei(amount.toString(), 'ether'));
-            let nonce = await this._web3.eth.getTransactionCount(user.eth.address);
+            const encKey = user.keys.find(key => key.address === from);
+            if(encKey === undefined) {
+                throw new Error(retcode.getAlreadyEmailAddress().msg);
+            }
+            const privateKey = crypto.dec(encKey.privatekey, passphase);
+            const txValue = this._web3.utils.numberToHex(this._web3.utils.toWei(amount.toString(), 'ether'));
+            const nonce = await this._web3.eth.getTransactionCount(from);
 
-            let rawTx = await this._web3.eth.accounts.signTransaction({    
-                from: user.eth.address,
+            const rawTx = await this._web3.eth.accounts.signTransaction({    
+                from: from,
                 to: to,
                 value: txValue,
                 gasPrice: '0x4e3b29200',
@@ -46,20 +50,22 @@ class eth {
             },
             privateKey);
 
-            let txInfo = await this._web3.eth.sendSignedTransaction(rawTx.rawTransaction);
+            const txInfo = await this._web3.eth.sendSignedTransaction(rawTx.rawTransaction);
             // console.log(txInfo);
 
             if(txInfo !== null || txInfo.status !== true) {
 
-                await txHistory.save({
+                await txHistoryModel.save({
                     userKey: user._id,
+                    fromAddr:from,
                     toAddr: to,
                     blockHash: txInfo.blockHash,
                     blockNum: txInfo.blockNumber,
                     txHash: txInfo.transactionHash,
                     txNum: txInfo.transactionIndex,
                     amount: amount.toString(),
-                    symbol:'ETH'
+                    symbol:'ETH',
+                    createDt: new Date()
                 });
 
                 return {
@@ -73,7 +79,7 @@ class eth {
             }
         }
         catch(e) {
-            console.error(e);
+            // console.error(e);
             throw e;
         }
     }

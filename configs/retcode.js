@@ -3,48 +3,69 @@
 class retcode {
     getSuccess() {
         return {
-            code : 200,
-            msg : 'Success'
+            status : 200,
+            msg : 'Success',
+            result: true
         }
     }
 
     getInternalServiceError() {
         return {
-            code: 500,
-            msg: 'Internal Service Error'
+            status: 500,
+            msg: 'Internal Service Error',
+            result: false
         }  
     }
 
     getWrongParameter() {
         return {
-            code: 500,
-            msg: 'Wrong Paramenter'
+            status: 500,
+            msg: 'Wrong Paramenter',
+            result: false
         }
     }
 
     getAlreadyEmailAddress() {
         return {
-            code: 500,
-            msg: 'already email address'
+            status: 401,
+            msg: 'email address already exists',
+            result: false
         }
     }
 
     getNotfoundEmail() {
         return {
-            code: 500,
-            msg: 'NotfoundEmail'
+            status: 401,
+            msg: 'NotfoundEmail',
+            result: false
         }
     }
     getWrongPassword() {
         return {
-            code: 500,
-            msg: 'WrongPassword'
+            status: 401,
+            msg: 'WrongPassword',
+            result: false
         }
     }
     getTokenError() {
         return {
-            code: 500,
-            msg: 'Token Error'
+            status: 500,
+            msg: 'Token Error',
+            result: false
+        }
+    }
+    getNotFoundWallet() {
+        return {
+            status: 500,
+            msg: 'Wallet not fount',
+            result: false
+        }
+    }
+    getTokenAddressExists() {
+        return {
+            status: 500,
+            msg: 'token address already exists',
+            result: false   
         }
     }
 }

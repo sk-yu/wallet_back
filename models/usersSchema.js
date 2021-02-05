@@ -1,19 +1,28 @@
 'use strict';
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
 
 const schema = mongoose.model('users', new mongoose.Schema({
     email: {type : String, index: true},
     password: String,
-    eth: {
+    keys: [{
         address: String,
         privatekey: String,
-    },
+    }],
     token: {type : String, index: true}
 },{ collection: 'users', versionKey: false }));
  
 async function save(user) {
     const ret = await new schema(user).save();
+    return ret;
+}
+
+async function addAddress(email, key) {
+    // const ret = await schema.updateOne(
+    const ret = await schema.findOneAndUpdate(
+        {email:email},
+        {$addToSet: {keys:key}},
+        {new:true}
+        )
     return ret;
 }
 
@@ -27,4 +36,4 @@ async function updateToken(email, token) {
     return user;
 }
 
-module.exports = {save, getUserFromEmail, updateToken};
+module.exports = {save, addAddress, getUserFromEmail, updateToken};

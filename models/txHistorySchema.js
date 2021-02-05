@@ -4,13 +4,15 @@ const Schema = mongoose.Schema;
 
 const schema = mongoose.model('txhistory', new mongoose.Schema({
     userKey: {type : String, index: true},
+    fromAddr: String,
     toAddr: String,
     blockHash: String,
     blockNum: Number,
     txHash: String,
     txNum: Number,
     amount: String,
-    symbol:String
+    symbol:String,
+    createDt:Date
 
 },{ collection: 'txhistory', versionKey: false }));
  

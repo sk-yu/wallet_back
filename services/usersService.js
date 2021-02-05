@@ -1,37 +1,45 @@
-const userModel = require('../models/users');
-const txHistoryModel = require('../models/txHistory');
+const userModel = require('../models/usersSchema');
+const walletModel = require('../models/ethWalletSchema');
+const txHistoryModel = require('../models/txHistorySchema');
 const crypto = require('../utils/crypto');
 const eth = require('./ethService');
+const erc20 = require('./erc20Service');
 const jwt = require('../utils/jwt');
+const retcode = require('../configs/retcode');
 
 async function signup(email, password, passphase) {
     try {
         if( await userModel.getUserFromEmail(email) ) {
-            return retcode.getAlreadyEmailAddress();
+            // return retcode.getAlreadyEmailAddress();
+            throw new Error(retcode.getAlreadyEmailAddress().msg);
         }
         let ethkey = await eth.newAddress(passphase);
         console.log(ethkey);
-        console.log(ethkey.privatekey);
+        // console.log(ethkey.privatekey);
         
-        await userModel.save({
+        //Todo : eth-> keys array로 변경, modeling 변경
+        const saveRet = await userModel.save({
             email:email,
             password:crypto.sha256Hash(password),
-            eth:{
+            keys:[{
                 address:ethkey.address,
                 privatekey:crypto.enc(ethkey.privateKey, passphase)
-                // privatekey:ethkey.privateKey
-            }
+            }]
         });
 
-        let ret = retcode.getSuccess();
-        ret['data'] = {
-            address: ethkey.address
-        }
+        // console.log(saveRet._id.toString());
 
-        return ret;
+        await walletModel.save({
+            userId:saveRet._id.toString(),
+            address: ethkey.address,
+            token:'',
+            symbol: 'ETH',
+            decimal:18
+        });
+
+        return ethkey.address;
     }
     catch(error) {
-        console.log(error);
         throw error;
     }
 }
@@ -41,19 +49,149 @@ async function signin(email, passwd) {
         let user = await userModel.getUserFromEmail(email);
 
         if( user == null ) {
-            return retcode.getNotfoundEmail();
+            // return retcode.getNotfoundEmail();
+            throw new Error(retcode.getNotfoundEmail().msg);
         }
 
         let encPasswd = crypto.sha256Hash(passwd);
         if(encPasswd === user.password) {
-            let ret = retcode.getSuccess();
+            // let ret = retcode.getSuccess();
             const token = await jwt.generateToken({email:user.email});
-            ret['token'] = token;
-            return ret;
+            // ret['token'] = token;
+            return token;
         }
         else {
-            return retcode.getWrongPassword();
+            // return retcode.getWrongPassword();
+            throw new Error(retcode.getWrongParameter().msg);
         }
+    }
+    catch(error) {
+        throw error;
+    }
+}
+
+async function addAddress(email, passphase) {
+    try {
+        let ethkey = await eth.newAddress(passphase);
+        // console.log(ethkey);
+        // console.log(ethkey.privatekey);
+
+        const key = {
+            address:ethkey.address,
+            privatekey:crypto.enc(ethkey.privateKey, passphase).toString()
+        }
+        const retUpdate = await userModel.addAddress(email, key);
+        await walletModel.save({
+            userId:retUpdate._id.toString(),
+            address: ethkey.address,
+            token:'',
+            symbol: 'ETH',
+            decimal:18
+        });
+
+        return ethkey.address;
+    }
+    catch(error) {
+        throw error;
+    }
+}
+
+async function addToken(userInfo, symbol, address, token, decimal) {
+    try {
+        const res = await walletModel.exists({
+            userId:userInfo._id.toString(),
+            address,
+            token});
+        if(res === true) {
+            throw new Error(retcode.getTokenAddressExists().msg)
+        }
+        const ret = await walletModel.save({
+            userId:userInfo._id.toString(),
+            address,
+            token,
+            symbol,
+            decimal
+        });
+
+        return ret;
+    }
+    catch(error) {
+        throw error;
+    }
+}
+
+async function getAddressInfos(token) {
+    try{
+        const jwtdec = await jwt.verifyToken(token);
+        if( jwtdec === null ) {
+            throw retcode.getTokenError().msg;
+        }
+        const user = await userModel.getUserFromEmail(jwtdec.email);
+
+        if( user === null ) {
+            return retcode.getNotfoundEmail();
+        }
+
+        let addresses = new Array;
+        user.keys.forEach(key => {
+            addresses.push(key.address);
+        })
+
+        let ret = retcode.getSuccess();
+        ret['data'] = {
+            address:addresses
+        }
+
+        return ret;
+    }
+    catch(error) {
+        throw error;
+    }
+}
+
+async function getWalletInfos(auth, address) {
+    try{
+        const jwtdec = await jwt.verifyToken(auth);
+        if( jwtdec === null ) {
+            throw retcode.getTokenError().msg;
+        }
+        const user = await userModel.getUserFromEmail(jwtdec.email);
+        const tokens = await walletModel.getWalletInfos(user._id.toString(), address);
+
+        if( user === null ) {
+            return retcode.getNotfoundEmail();
+        }
+
+        if( tokens === null) {
+            return retcode.getNotFoundWallet();
+        }
+
+        let ret = retcode.getSuccess();
+        let arr = new Array;
+
+        const promises = tokens.map( async (token) => {
+            let amount = '';
+            if(token.symbol === 'ETH') {
+                amount = await eth.getBalance(token.address);
+            }
+            else {
+                amount = await erc20.getBalance(token.address, token.token);
+            }
+            arr.push({
+                symbol:token.symbol,
+                token:token.token,
+                address:token.address,
+                decimal:token.decimal,
+                amount:amount
+            });
+            // console.log(amount);
+        });
+        await Promise.all(promises);
+
+        ret['data'] = arr;
+        // ret['data'] = tokens;
+
+        return ret;
     }
     catch(error) {
         throw error;
@@ -62,15 +200,11 @@ async function signin(email, passwd) {
 
 async function getUserInfo(token) {
     try{
-        let jwtdec = await jwt.verifyToken(token);
+        const jwtdec = await jwt.verifyToken(token);
         if( jwtdec === null ) {
             throw retcode.getTokenError().msg;
         }
-        let user = await userModel.getUserFromEmail(jwtdec.email);
-
-        if( user === null ) {
-            return retcode.getNotfoundEmail();
-        }
+        const user = await userModel.getUserFromEmail(jwtdec.email);
 
         return user;
     }
@@ -90,4 +224,4 @@ async function getTxHistory(token) {
     }
 }
 
-module.exports = {signup, signin, getUserInfo, getTxHistory};
+module.exports = {signup, signin, addAddress, addToken, getAddressInfos, getWalletInfos, getUserInfo, getTxHistory};

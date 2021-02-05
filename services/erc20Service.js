@@ -5,7 +5,7 @@ const crypto = require('../utils/crypto');
 const abiDecoder = require('abi-decoder');
 const abiFile = require('./erc20.abi');
 abiDecoder.addABI(abiFile);
-const txHistory = require('../models/txHistory');
+const txHistoryModel = require('../models/txHistorySchema');
 
 class erc20 {
     constructor() {
@@ -24,7 +24,8 @@ class erc20 {
             const symbol = await token.methods.symbol().call();
 
             // console.log(`balanceOf : ${user.eth.address} ${balance + ' ' + symbol}`);
-            return balance + ' ' + symbol;
+            // return balance + ' ' + symbol;
+            return balance.toString();
         }
         catch(e) {
             console.error(e);
@@ -32,8 +33,13 @@ class erc20 {
         }
     }
 
-    async sendTransaction(user, passphase, to, amount, tokenaddress) {
+    async sendTransaction(user, passphase, from, to, amount, tokenaddress) {
         try{
+            const encKey = user.keys.find(key => key.address === from);
+            if(encKey === undefined) {
+                throw new Error('address not found');
+            }
+            
             const token = new this._web3.eth.Contract(abiFile, tokenaddress,{
                 form:user.eth.address
             });
@@ -63,8 +69,9 @@ class erc20 {
             console.log(txInfo);
 
             if(txInfo !== null || txInfo.status !== true) {
-                await txHistory.save({
+                await txHistoryModel.save({
                     userKey: user._id,
+                    fromAddr: to,
                     toAddr: to,
                     blockHash: txInfo.blockHash,
                     blockNum: txInfo.blockNumber,
