@@ -41,19 +41,20 @@ class erc20 {
             }
             
             const token = new this._web3.eth.Contract(abiFile, tokenaddress,{
-                form:user.eth.address
+                form:from
             });
 
-            const privateKey = crypto.dec(user.eth.privatekey, passphase);
+            const privateKey = crypto.dec(encKey.privatekey, passphase);
             const txValue = '0x0';
-            const nonce = await this._web3.eth.getTransactionCount(user.eth.address);
+            const nonce = await this._web3.eth.getTransactionCount(from);
             const decimal = await token.methods.decimals().call();
             const balance = amount*Math.pow(10, decimal);
+            // const balance = amount;
             const txData = token.methods.transfer(to, balance.toString()).encodeABI();
             const symbol = await token.methods.symbol().call();
 
             let rawTx = await this._web3.eth.accounts.signTransaction({    
-                from: user.eth.address,
+                from: from,
                 to: tokenaddress,
                 value: txValue,
                 gasPrice: '0x4e3b29200',
@@ -78,7 +79,8 @@ class erc20 {
                     txHash: txInfo.transactionHash,
                     txNum: txInfo.transactionIndex,
                     amount: amount.toString(),
-                    symbol: symbol
+                    symbol: symbol,
+                    createDt: new Date()
                 });
 
                 return {

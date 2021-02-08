@@ -39,11 +39,11 @@ router.get('/balance', async (req, res) => {
 
 router.post('/transfer', async (req, res) => {
     try {
-        const userInfo = await userSvc.getUserInfo(req.headers['access-token']);
+        const userInfo = await userSvc.getUserInfo(req.headers['x-access-token']);
         if(userInfo === undefined) {
             return res.send(retcode.getWrongParameter());
         }
-        const txInfo = await erc20Svc.sendTransaction(userInfo, req.body.passphase, req.body,from, req.body.to, req.body.amount, req.body.tokenaddress);
+        const txInfo = await erc20Svc.sendTransaction(userInfo, req.body.passphase, req.body.from, req.body.to, req.body.amount, req.body.tokenaddress);
 
         let ret = retcode.getSuccess();
         ret['data'] = txInfo;
