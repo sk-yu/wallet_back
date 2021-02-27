@@ -4,6 +4,35 @@ const router = express.Router();
 const userSvc = require('../../services/usersService');
 const ethSvc = require('../../services/ethService');
 
+/**
+ * @swagger
+ * tags:
+ *   name: eth
+ *   description: ethereum 관련 api (자산정보, 전송, 주소생성)
+ */
+/**
+ * @swagger
+ * path:
+ *   /api/v1/eth/balance:
+ *     get:
+ *       summary: eth 자산정보
+ *       security: 
+ *         - accessToken: []
+ *       tags:
+ *         - eth
+ *       parameters:
+ *         - in: query
+ *           name: address
+ *           schema:
+ *             type: string
+ *           required: true
+ *           description: user address
+ *       responses:
+ *         200:
+ *           description: 성공
+ *         4xx~5xx:
+ *           description: 실패
+ */
 //eth 자산정보
 router.get('/balance', async (req, res) => {
     try {
@@ -38,6 +67,42 @@ router.get('/balance', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * path:
+ *   /api/v1/eth/transfer:
+ *     post:
+ *       summary: eth 전송
+ *       security: 
+ *         - accessToken: []
+ *       tags:
+ *         - eth
+ *       parameters: []
+ *       requestBody:
+ *         description: from, to, amount, passphase
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  from:
+ *                    type: string
+ *                    example: 0x00...
+ *                  to:
+ *                    type: string
+ *                    example: 0x00...
+ *                  amount:
+ *                    type: string
+ *                    example: 0.001
+ *                  passphase:
+ *                    type: string
+ *                    example: 1234
+ *       responses:
+ *         '200':
+ *           description: 성공
+ *         '4xx-5xx':
+ *           description: 실패
+ */
 //eth 전송
 router.post('/transfer', async (req, res) => {
     try {
@@ -60,6 +125,33 @@ router.post('/transfer', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * path:
+ *   /api/v1/eth/address:
+ *     post:
+ *       summary: 지갑 주소생성
+ *       security: 
+ *         - accessToken: []
+ *       tags:
+ *         - eth
+ *       parameters: []
+ *       requestBody:
+ *         description: passphase
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  passphase:
+ *                    type: string
+ *                    example: 1234
+ *       responses:
+ *         '200':
+ *           description: 성공
+ *         '4xx-5xx':
+ *           description: 실패
+ */
 //주소생성
 router.post('/address', async function(req, res) {
     try {
@@ -67,7 +159,7 @@ router.post('/address', async function(req, res) {
         if(userInfo === undefined) {
             return res.send(retcode.getWrongParameter());
         }
-        const address = await userSvc.addAddress(userInfo.email, req.body.passPhase);
+        const address = await userSvc.addAddress(userInfo.email, req.body.passphase);
 
         if(address) {
             let ret = retcode.getSuccess();

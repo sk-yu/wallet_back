@@ -3,7 +3,43 @@ const express = require('express');
 const router = express.Router();
 const userSvc = require('../services/usersService');
 
-//회원가입
+/**
+ * @swagger
+ * tags:
+ *   name: account
+ *   description: 회원가입, 로그인, 지갑정보 가져오기, address정보 가져오기
+ */
+/**
+ * @swagger
+ * path:
+ *   /api/v1/account/signup:
+ *     post:
+ *       summary: 회원가입
+ *       tags:
+ *         - account
+ *       requestBody:
+ *         description: email, password
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  email:
+ *                    type: string
+ *                    example: test@test.com
+ *                  password:
+ *                    type: string
+ *                    example: 1234
+ *                  passphase:
+ *                    type: string
+ *                    example: 1234
+ *                    description: 2차 비밀번호
+ *       responses:
+ *         '200':
+ *           description: 성공
+ *         '4xx-5xx':
+ *           description: 실패
+ */
 router.post('/signup', async (req, res) => {
     try {
         let ret = retcode.getSuccess();
@@ -19,7 +55,33 @@ router.post('/signup', async (req, res) => {
     }
 });
 
-//로그인
+/**
+ * @swagger
+ * path:
+ *   /api/v1/account/signin:
+ *     post:
+ *       summary: 로그인
+ *       tags:
+ *         - account
+ *       requestBody:
+ *         description: email, password
+ *         content:
+ *           application/json:
+ *             schema:
+ *                type: object
+ *                properties:
+ *                  email:
+ *                    type: string
+ *                    example: test@test.com
+ *                  password:
+ *                    type: string
+ *                    example: 1234
+ *       responses:
+ *         '200':
+ *           description: 성공
+ *         '4xx-5xx':
+ *           description: 실패
+ */
 router.post('/signin', async (req, res) => {
     try {
         const token = await userSvc.signin(req.body.email, req.body.password);
@@ -36,6 +98,22 @@ router.post('/signin', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * path:
+ *   /api/v1/account/address:
+ *     get:
+ *       summary: address 정보 가져오기
+ *       security:
+ *         - accessToken: []
+ *       tags:
+ *         - account
+ *       responses:
+ *         '200':
+ *           description: 성공
+ *         '4xx-5xx':
+ *           description: 실패
+ */
 //지갑정보 (address 정보)
 router.get('/address', async (req, res) => {
     try {
@@ -46,11 +124,34 @@ router.get('/address', async (req, res) => {
         console.error(error);
         let ret = retcode.getInternalServiceError();
         ret['error'] = error;
-        return res.status(ret.status).send(ret); 
+        return res.status(ret.status).send(ret);
     }
 });
 
-//지갑정보 (토큰포함)
+/**
+ * @swagger
+ * path:
+ *   /api/v1/account/wallets:
+ *     get:
+ *       summary: wallet 정보 가져오기
+ *       security: 
+ *         - accessToken: []
+ *       tags:
+ *         - account
+ *       parameters:
+ *         - in: query
+ *           name: address
+ *           schema:
+ *             type: string
+ *           required: true
+ *           description: user address
+ *       responses:
+ *         200:
+ *           description: 성공
+ *         4xx~5xx:
+ *           description: 실패
+ */
+//지갑정보 (wallets 정보)
 router.get('/wallets', async (req, res) => {
     try {
         const ret = await userSvc.getWalletInfos( req.headers['x-access-token'], req.query.address);
@@ -60,7 +161,7 @@ router.get('/wallets', async (req, res) => {
         console.error(error);
         let ret = retcode.getInternalServiceError();
         ret['error'] = error;
-        return res.status(ret.status).send(ret); 
+        return res.status(ret.status).send(ret);
     }
 });
 

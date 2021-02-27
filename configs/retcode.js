@@ -49,7 +49,7 @@ class retcode {
     }
     getTokenError() {
         return {
-            status: 500,
+            status: 401,
             msg: 'Token Error',
             result: false
         }
