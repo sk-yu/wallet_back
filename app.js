@@ -13,6 +13,9 @@ const swaggerOptions = require('./routes/swagger/swagger');
 const swaggerSpec = swaggerJSDoc(swaggerOptions);
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
+//ejs
+app.set('view engine', 'ejs');
+app.engine('html', require('ejs').renderFile);
 //정적파일 사용
 app.use(express.static('public'));
 
@@ -38,21 +41,24 @@ app.use(cors);
 //modules
 const property = require('./configs/property');
 retcode = require('./configs/retcode');
-// db = require('./models/db/mongodb');
-// eth = require('./modules/wallet/eth');
-// mongoose = require('./modules/db/mongodb');
-// users = require('./modules/db/users');
 
 //routes
-// const index = require('./routes/index');
+const index = require('./routes/index');
 const usersRouter = require('./routes/usersRouter');
 const ethRouter = require('./routes/wallet/ethRouter');
 const ethErc20Router = require('./routes/wallet/erc20Router');
 const txHistoryRouter = require('./routes/txHistoryRouter');
 
+app.use('/', index);
 app.use(`${property.apiPrePath}/account`, usersRouter);
 app.use(`${property.apiPrePath}/eth`, ethRouter);
 app.use(`${property.apiPrePath}/token`, ethErc20Router);
 app.use(`${property.apiPrePath}/history`, txHistoryRouter);
+
+app.use((req, res, next) => {
+    res.redirect(301, '/');
+})
+
+
 
 module.exports = app;

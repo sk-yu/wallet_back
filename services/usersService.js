@@ -7,17 +7,15 @@ const erc20 = require('./erc20Service');
 const jwt = require('../utils/jwt');
 const retcode = require('../configs/retcode');
 
+//회원가입
 async function signup(email, password, passphase) {
     try {
         if( await userModel.getUserFromEmail(email) ) {
-            // return retcode.getAlreadyEmailAddress();
             throw new Error(retcode.getAlreadyEmailAddress().msg);
         }
         let ethkey = await eth.newAddress(passphase);
         console.log(ethkey);
-        // console.log(ethkey.privatekey);
         
-        //Todo : eth-> keys array로 변경, modeling 변경
         const saveRet = await userModel.save({
             email:email,
             password:crypto.sha256Hash(password),
@@ -26,8 +24,6 @@ async function signup(email, password, passphase) {
                 privatekey:crypto.enc(ethkey.privateKey, passphase)
             }]
         });
-
-        // console.log(saveRet._id.toString());
 
         await walletModel.save({
             userId:saveRet._id.toString(),
@@ -44,12 +40,12 @@ async function signup(email, password, passphase) {
     }
 }
 
+//로그인
 async function signin(email, passwd) {
     try{
         let user = await userModel.getUserFromEmail(email);
 
         if( user == null ) {
-            // return retcode.getNotfoundEmail();
             throw new Error(retcode.getNotfoundEmail().msg);
         }
 
@@ -61,7 +57,6 @@ async function signin(email, passwd) {
             return token;
         }
         else {
-            // return retcode.getWrongPassword();
             throw new Error(retcode.getWrongParameter().msg);
         }
     }
@@ -70,6 +65,7 @@ async function signin(email, passwd) {
     }
 }
 
+//이더리움 지갑주소 추가
 async function addAddress(email, passphase) {
     try {
         let ethkey = await eth.newAddress(passphase);
@@ -96,6 +92,7 @@ async function addAddress(email, passphase) {
     }
 }
 
+//erc20 토큰 추가
 async function addToken(userInfo, symbol, address, token, decimal) {
     try {
         const res = await walletModel.exists({
@@ -120,6 +117,7 @@ async function addToken(userInfo, symbol, address, token, decimal) {
     }
 }
 
+//사용자 주소 가져오기
 async function getAddressInfos(token) {
     try{
         const jwtdec = await jwt.verifyToken(token);
@@ -149,6 +147,7 @@ async function getAddressInfos(token) {
     }
 }
 
+//사용자 erc20 토큰 및 balance 가져오기
 async function getWalletInfos(auth, address) {
     try{
         const jwtdec = await jwt.verifyToken(auth);
@@ -213,6 +212,7 @@ async function getUserInfo(token) {
     }
 }
 
+//히스토리 정보 가져오기
 async function getTxHistory(token) {
     try{
         let user = await getUserInfo(token);
