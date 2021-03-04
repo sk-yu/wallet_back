@@ -1,0 +1,21 @@
+{
+    "apps": [
+    {
+        "name": "wallet",
+        "script": "./bin/www",
+        "watch": false,
+        "env_dev": {
+            "NODE_ENV": "dev"
+        },
+        "env_testnet": {
+            "NODE_ENV": "testnet"
+        },
+        "env_prod": {
+            "NODE_ENV": "prod"
+        },
+        "log_date_format" : "YYYY-MM-DD HH:mm:ss",
+        "kill_timeout" : 10000,
+        "out_file": "./logs/wallet.log",
+        "error_file": "./logs/wallet_error.log"
+    }]
+}
