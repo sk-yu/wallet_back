@@ -2,13 +2,24 @@
 
 Ethereum and erc20 wallet backend service.
 
-## 설치 : npm install, mongoDB
+## 구성
+- 위 프로젝트는 nodejs, express 기반으로 개발 됨
+- web3js로 ethereum관련 처리
 
-## 설정 : {projects}\configs\property.js
-      mongodb 설정 필수
+
+## 설치
+- npm install
+- mongoDB설정 필수
+
+
+## 설정 
+- {projects}\configs\property.js
+
+
 ## demo page(오라클 클라우드)
   - swagger : http://132.145.91.65:3000/docs
   - with front : http://132.145.91.65:3000/
+
 
 ## API
 #### 1.회원가입
