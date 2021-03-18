@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+      - /home/ubuntu/docker/mongodb/data/db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: wallet
+      MONGO_INITDB_ROOT_PASSWORD: walletuser
